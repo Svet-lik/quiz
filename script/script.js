@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    //'use strict';
+    'use strict';
     const btnOpenModal = document.getElementById('btnOpenModal');
     const modalBlock = document.getElementById('modalBlock');
     const closeModal = document.getElementById('closeModal');
@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const burgerBtn = document.getElementById('burger');
     const prevButton = document.getElementById('prev');
     const nextButton = document.getElementById('next');
+    const modalDialog = document.querySelector('.modal-dialog');
 
     const questions = [
         {
@@ -85,6 +86,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];  
     
+    let count = -100;
+    
+    modalDialog.style.top = '-100%';
+
+    const animateModal = ( ) => { 
+        modalDialog.style.top = count + '%';
+        count ++;  
+        
+        if (count < 0) {
+            requestAnimationFrame(animateModal);
+        } else {
+            count = -100;
+        }
+    };
+
     if (clientWidth<768) {
         burgerBtn.style.display = 'flex';
     } else {
@@ -100,13 +116,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    burgerBtn.addEventListener('click', () => {
-        burgerBtn.classList.add('active');
+    btnOpenModal.addEventListener('click', () => {
+        requestAnimationFrame(animateModal);
         modalBlock.classList.add('d-block');
         playTest();
     });
 
-    btnOpenModal.addEventListener('click', () => {
+    burgerBtn.addEventListener('click', () => {
+        requestAnimationFrame(animateModal);
+        burgerBtn.classList.add('active');
         modalBlock.classList.add('d-block');
         playTest();
     });
@@ -132,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const renderAnswers = (index) => {
             questions[index].answers.forEach((answer) => {
                 const answerItem = document.createElement('div');
-                answerItem.classList.add('answers-item', 'd-flex', 'flex-column');
+                answerItem.classList.add('answers-item', 'd-flex', 'justify-content-center');
                 answerItem.innerHTML = `                
                     <input type="${questions[index].type}" id="${answer.title}" name="answer" class="d-none">
                     <label for="${answer.title}" class="d-flex flex-column justify-content-between">
@@ -142,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 formAnswers.appendChild(answerItem);
             })
-        }
+        };
 
         const renderQuestions = (indexQuestion) => {
             formAnswers.innerHTML = '';
