@@ -13,82 +13,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextButton = document.getElementById('next');
     const sendButton = document.getElementById('send');
     const modalTitle = document.querySelector('.modal-title');
+    
+    // подключение базы данных
+    const firebaseConfig = {
+        apiKey: "AIzaSyA8YrsLAE67RNSD3ejIRDnu_jaPMLPfbV4",
+        authDomain: "testburger-8701c.firebaseapp.com",
+        databaseURL: "https://testburger-8701c.firebaseio.com",
+        projectId: "testburger-8701c",
+        storageBucket: "testburger-8701c.appspot.com",
+        messagingSenderId: "265716995294",
+        appId: "1:265716995294:web:4dda8f60f05df13d24de4f",
+        measurementId: "G-RR3SS0FD1J"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
 
-// объект, содержащий вопросы и ответы
-    const questions = [
-        {
-            question: "Какого цвета бургер?",
-            answers: [
-                {
-                    title: 'Стандарт',
-                    url: './image/burger.png'
-                },
-                {
-                    title: 'Черный',
-                    url: './image/burgerBlack.png'
-                }
-            ],
-            type: 'radio'
-        },
-        {
-            question: "Из какого мяса котлета?",
-            answers: [
-                {
-                    title: 'Курица',
-                    url: './image/chickenMeat.png'
-                },
-                {
-                    title: 'Говядина',
-                    url: './image/beefMeat.png'
-                },
-                {
-                    title: 'Свинина',
-                    url: './image/porkMeat.png'
-                }
-            ],
-            type: 'radio'
-        },
-        {
-            question: "Дополнительные ингредиенты?",
-            answers: [
-                {
-                    title: 'Помидор',
-                    url: './image/tomato.png'
-                },
-                {
-                    title: 'Огурец',
-                    url: './image/cucumber.png'
-                },
-                {
-                    title: 'Салат',
-                    url: './image/salad.png'
-                },
-                {
-                    title: 'Лук',
-                    url: './image/onion.png'
-                }
-            ],
-            type: 'checkbox'
-        },
-        {
-            question: "Добавить соус?",
-            answers: [
-                {
-                    title: 'Чесночный',
-                    url: './image/sauce1.png'
-                },
-                {
-                    title: 'Томатный',
-                    url: './image/sauce2.png'
-                },
-                {
-                    title: 'Горчичный',
-                    url: './image/sauce3.png'
-                }
-            ],
-            type: 'radio'
-        }
-    ];  
+// функция получения данных
+    const getData = () => {        
+        formAnswers.textContent = 'LOAD';    
+        nextButton.classList.add('d-none');
+                    prevButton.classList.add('d-none');    
+        setTimeout(() => {               
+              firebase.database().ref().child('questions').once('value')
+              .then(snap => playTest(snap.val()))
+        }, 500);
+        
+    };
+
+
     
 // анимация появления модального окна
     let count = -100;
@@ -126,13 +78,13 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(animateModal);
         burgerBtn.classList.add('active');
         modalBlock.classList.add('d-block');
-        playTest();
+        getData();
     });
     
     btnOpenModal.addEventListener('click', () => {
         requestAnimationFrame(animateModal);
         modalBlock.classList.add('d-block');
-        playTest();
+        getData();
     });
 
 
@@ -153,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 // функция запуска тестирования
-    const playTest = () => {
+    const playTest = (questions) => {
         const finalAnswers =[];
         const obj = {};
         //переменная с номером вопроса
@@ -182,13 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 case (numberQuestion >= 0 && numberQuestion < questions.length):
                     questionTitle.textContent = `${questions[indexQuestion].question}`;
                     renderAnswers(indexQuestion);
-
                     nextButton.classList.remove('d-none');
-                    prevButton.classList.remove('d-none');
+                    if (numberQuestion === 0) {
+                        prevButton.classList.add('d-none');
+                    } else {
+                        prevButton.classList.remove('d-none');
+                    }
                     sendButton.classList.add('d-none');
-                    break;
-                case (numberQuestion === 0):
-                    prevButton.classList.add('d-none');
                     break;
                 case (numberQuestion === questions.length):
                     nextButton.classList.add('d-none');
@@ -252,10 +204,15 @@ document.addEventListener('DOMContentLoaded', function() {
         sendButton.onclick = () => {
             checkAnswers();
             numberQuestion++;
-            renderQuestions(numberQuestion);    
-            setTimeout(() => { 
-                modalBlock.classList.remove('d-block'); 
-            }, 2000);                
+            renderQuestions(numberQuestion);  
+            firebase
+                .database()
+                .ref()  
+                .child('contacts')
+                .push(finalAnswers)  
+                setTimeout(() => { 
+                    modalBlock.classList.remove('d-block'); 
+                }, 2000);               
         }; 
     };
     
