@@ -155,8 +155,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // функция запуска тестирования
     const playTest = () => {
         const finalAnswers =[];
+        const obj = {};
         //переменная с номером вопроса
         let numberQuestion = 0;
+        modalTitle.textContent = 'Ответь на вопрос:';
         // функция рендеринга ответов
         const renderAnswers = (index) => {
             questions[index].answers.forEach((answer) => {
@@ -200,13 +202,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label for="numberPhone">Введите ваш номер телефона</label>
                         <input type="phone" class="form-control" id="numberPhone">
                     </div>
-                    `
+                    `;
+                    const numberPhone = document.getElementById('numberPhone');
+                        numberPhone.addEventListener('input', (event) => {
+                            event.target.value = event.target.value.replace(/[^0-9+-]/, '');
+                        })
                     break;
                 case (numberQuestion === questions.length+1):
                     sendButton.classList.add('d-none');
                     formAnswers.textContent = 'Спасибо за пройденный тест!'; 
+
+                    for (let key in obj) {
+                        let newObj = {};
+                        newObj[key] = obj[key];
+                        finalAnswers.push(newObj); 
+                    }
                     break;
-            };      
+            };  
+            
         };
        
 
@@ -214,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderQuestions(numberQuestion);  
 
         const checkAnswers = () => {
-            const obj = {};
+            
             const inputs = [...formAnswers.elements].filter((input) => input.checked || input.id === 'numberPhone');
             
             inputs.forEach((input, index) => {
@@ -222,8 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     obj[`${index}_${questions[numberQuestion].question}`] = input.value;
                 };
                 if (numberQuestion === questions.length) {obj['Номер телефона'] = input.value;};
-            });
-            finalAnswers.push(obj);          
+            });      
             
         }
 
@@ -243,8 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderQuestions(numberQuestion);    
             setTimeout(() => { 
                 modalBlock.classList.remove('d-block'); 
-            }, 2000);
-            console.log(finalAnswers);                   
+            }, 2000);                
         }; 
     };
     
